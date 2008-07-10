@@ -20,7 +20,7 @@ class Database {
 	 * Loads the Singleton instance of the Database class.  If the Database 
 	 * class hasn't been initiated yet, it'll connect to the database.
 	 */
-	public static function init($host = null) {
+	public static function init() {
 		if (!isset(self::$instance)) {
 			self::$instance = new Database(); 
 		} return self::$instance;
@@ -28,7 +28,9 @@ class Database {
 
 	public static function getLastId() {
 		$self = self::init();
-		return mysql_insert_id($self->connection);
+		$id = mysql_insert_id();
+		if ($id === 0) throw new DataException("mysql_insert_id has failed.");
+		return $id;
 	}
 
 	/**
@@ -160,8 +162,13 @@ class Database {
 	/**
 	 * Will do a generic query and return the result.  This method doesn't need
 	 * to be called on its own most times.
+	 *
+	 * DO NOT USE THIS METHOD DIRECTLY UNLESS YOU KNOW WHAT YOU'RE DOING.
+	 * THERE ARE NO SECURITY MEASURES IN PLACE; THE RAW DATA OF THE QUERY
+	 * WILL BE PASSED DIRECTLY TO THE DATABASE.
 	 */
-	private function doQuery($query) {
+	public function doQuery($query) {
+		if (self::$instance == null) throw new DataException("Database not initialized.");
 		if ($query == null) throw new DataException("Query can't be null.");
 		$this->totalQueries++;
 		$this->queries[] = $query;

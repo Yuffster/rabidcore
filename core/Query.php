@@ -79,7 +79,8 @@ class Query implements Iterator {
 		$this->ensureSearch(); //Perform the query when the first row is requested.
 		if ($n >= $this->total || $n < 0) return null;
 		if (isset($this->objs[$n])) return $this->objs[$n];
-		if ($this->rows[$n]) $this->objs[$n] = $this->getObj($this->rows[$n]); 
+		if (isset($this->rows[$n])) $this->objs[$n] = $this->getObj($this->rows[$n]); 
+		else return null;
 		return $this->objs[$n];
 	}
 

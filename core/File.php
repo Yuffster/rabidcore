@@ -72,7 +72,7 @@ class File {
 	 * of env.php.
 	 */
 	public static function find($loc) {
-		$path = Env::getFilePath();
+		$path = getFilePath();
 		if (file_exists($path."/$loc") && !is_dir($path."/$loc")) return true;
 		return false;
 	}
@@ -81,10 +81,10 @@ class File {
 	 * Returns the contents of a file.  Location is relative to env.php.
 	 */
 	public static function getContents($loc) {
-		$file = Env::getFilePath()."/$loc";
+		$file = getFilePath()."/$loc";
 		if (!file_exists($file)) {
 			throw new FileNotFoundException("File not found: $loc");
-		} return file_get_contents(Env::getFilePath()."/$loc");
+		} return file_get_contents(getFilePath()."/$loc");
 	}
 
 	/**
@@ -94,7 +94,7 @@ class File {
 	 * Directory path is relative to env.php.
 	 */
 	static function collectDir($dname) {
-		$directory = Env::getFilePath()."/$dname";
+		$directory = getFilePath()."/$dname";
 		$dir = dir($directory);
 		$l = Array();
 		while ($f = $dir->read()) {

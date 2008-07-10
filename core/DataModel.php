@@ -172,14 +172,19 @@ class DataModel extends Base {
 	 * If there's no raw data, we'll just return null.
 	 */
 	public function __get($key) {
-		if (!$this->canView($key)) return null;
-		if ($this->retrieve($key)) return $this->stored($key);
 		$meth = "get$key";
-		if (method_exists($this, $meth)) {
+		if ($this->retrieve($key)) {
+			return $this->retrieve($key);
+		} else if (method_exists($this, $meth)) {
 			return $this->store($key, $this->$meth());
 		} else if (isset($this->__linked[$key])) {
 			return $this->getLinked($key);
-		}   return $this->getRaw($key);
+		} 
+		return $this->get($key);
+	}
+
+	public function get($key) {
+		if ($this->canView($key)) return $this->getRaw($key);
 	}
 
 	/**
@@ -194,6 +199,7 @@ class DataModel extends Base {
 		if ($this->__new == true) {
 			if (!$this->canCreate()) throw new PermissionException();
 			$this->__new =  false;
+			if (!$this->db) throw new Exception("Database not loaded.");
 			return $this->db->insert($this->table, $this->__modified);
 		//Has this object been modified?
 		} else if ($this->keyField && count($this->__modified) > 0) {
@@ -204,9 +210,7 @@ class DataModel extends Base {
 	
 	public function delete() {
 		if (!$this->canDelete()) throw new PermissionException();
-		if ($this->canDelete()) {
-			$this->db->delete($this->table,Array($this->keyField=>$this->key));
-		}
+		$this->db->delete($this->table,Array($this->keyField=>$this->key));
 	}
 
 	/**
@@ -253,8 +257,9 @@ class DataModel extends Base {
 	private function modifyField($key, $value) {
 		try {
 			$this->validate($key, $value);
+			if ($this->canEdit($key) === false) return false;
 			if (method_exists($this, "set$key")) {
-				$newValue = call_user_func(Array($this, "set$key"), $value);
+				$value = call_user_func(Array($this, "set$key"), $value);
 			}
 		} catch (UserDataException $e) { 
 			$this->errors[$key] = $e->getMessage();
@@ -273,7 +278,7 @@ class DataModel extends Base {
 	 *
 	 * Note that this method will NEVER be called in a new model object.
 	 */
-	private function setRaw($key, $value) {
+	protected function setRaw($key, $value) {
 		if ($this->__raw[$key] !== $value) { $this->__modified[$key] = $value; }
 	}
 

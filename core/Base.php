@@ -7,7 +7,7 @@
  */
 class Base {
 
-	private $__store = Array();
+	private $__stored = Array();
 
 	protected function __toString() {
 		return "[".get_class($this)."]";

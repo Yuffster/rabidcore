@@ -50,8 +50,9 @@ class Commands extends Base {
 			$obj->save();
 			$this->onCreate($obj);
 			$id = Database::getLastId();
+			$result = new Query($this->model, $id);
 			$this->setRedirect("show/$id", ucfirst($this->model+" created."));
-		} return $obj;
+		} if ($result) return $result->getRow(1);
 	}
 
 	public function getModel() {

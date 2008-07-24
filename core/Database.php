@@ -93,12 +93,10 @@ class Database {
 	/** 
 	 * Generates a filter based on an array of keys and desired values.
 	 *
-	 * Unless $complex is set to true, the criteria array will be considered
-	 * a key/value pair of equals values.
-	 * 
-	 * Passing ({'id':7,'email':'me@site.com'}, 0) will do an = search on each
+	 * Passing ({'id':7,'email':'me@site.com'}) will do an = search on each
 	 *     key/value pair.
-	 * Passing ({'like':{'firstName':'%bob%'},'not like':{'lastName':'%smith'}}, 1)
+	 *
+	 * Passing ({'like':{'firstName':'%bob%'},'not like':{'lastName':'%smith'}})
 	 *     would create a complex filter. 
 	 */
 	public function generateFilter($criteria) {

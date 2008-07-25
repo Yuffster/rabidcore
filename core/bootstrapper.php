@@ -3,13 +3,12 @@
 /**
  * RabidCore Bootstrapper
  *
- * Contains a few utility functions (which will probably be moved before final 
- * release), and is in charge of loading the configuration and sending each
- * request to the Router.
+ * This file loads the application environment.  All RabidCore classes rely on
+ * this file.
  *
- * To make RabidCore work, simply route all requests to this file and keep all
- * source files within the same directory as this file or within child
- * directories of this file.
+ * To make RabidCore work, simply route all requests to request_router.php, make
+ * sure the request_router loads this file, and keep all source files within the
+ * same directory as this file or within child directories of this file.
  *
  * Copyright 2008 Michelle Steigerwalt <msteigerwalt.com>.
  * Part of RabidCore.

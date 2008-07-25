@@ -1,16 +1,12 @@
 <?
 
-include('bootstrapper.php');
 /**
- * Development error output.
+ * All requests should be redirected to this file, or a file with the same call
+ * to routeRequest() in bootstrapper.php.
  */
-function outputError($e) {
-	echo "Whoops, there was an error: ".$e->getMessage();
-	echo "<pre>";
-	print_r($e);
-	echo "</pre>";
-	die();
-}
+
+include('bootstrapper.php');
+
 routeRequest();
 
 ?>

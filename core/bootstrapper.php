@@ -3,12 +3,13 @@
 /**
  * RabidCore Bootstrapper
  *
- * This file loads the application environment.  All RabidCore classes rely on
- * this file.
+ * Contains a few utility functions (which will probably be moved before final 
+ * release), and is in charge of loading the configuration and sending each
+ * request to the Router.
  *
- * To make RabidCore work, simply route all requests to request_router.php, make
- * sure the request_router loads this file, and keep all source files within the
- * same directory as this file or within child directories of this file.
+ * To make RabidCore work, simply route all requests to this file and keep all
+ * source files within the same directory as this file or within child
+ * directories of this file.
  *
  * Copyright 2008 Michelle Steigerwalt <msteigerwalt.com>.
  * Part of RabidCore.
@@ -16,6 +17,23 @@
  */
 
 	loadConfig();
+
+	/**
+	 * The request router looks at the URI path, tries to load it from /assets,
+	 * then tries to route the request through the Router if it's a model.
+	 * If it's not a model, the TemplateEngine tries to render the template file.
+	 */
+	function routeRequest() {
+		$path = getPath();
+		if (File::find("assets/$path")) File::render("assets/$path");
+		$argh = explode("/", $path);
+		if (model_exists($argh[0])) {
+			$router = new Router();
+			echo $router->route($path);
+		} else {
+			echo TemplateEngine::renderPage($path);
+		}
+	}
 
 	/**
 	 * Throws a UserDataException.  For use in validation methods.  You should
@@ -38,6 +56,17 @@
 	function pick() {
 		$args = func_get_args();
 		foreach ($args as $arg) if ($arg) return $arg;
+	}
+
+	/**
+	 * Checks to see if the specified model exists.
+	 */
+	function model_exists($model) {
+		try {
+			__autoload(ucfirst($model));
+		} catch (ClassException $e) {
+			return false;
+		} return true;
 	}
 
 	/**
@@ -73,7 +102,7 @@
 			}
 			//Create a new empty class so the script doesn't die.
 			eval("class $class {}");
-			throw new Exception("Class $class doesn't exist or can't be found.");
+			throw new ClassException("Class $class doesn't exist or can't be found.");
 		}	
 
 	}
@@ -96,14 +125,6 @@
 			}
 		} $dir->close();
 		return false;
-	}
-
-	function routeRequest() {
-		$path = getPath();
-		if (File::find("assets/$path")) File::render("assets/$path");
-		//Error handling would go here.
-		$router = new Router();
-		echo $router->route($path);
 	}
 
 	function loadConfig($file = 'config.php') {

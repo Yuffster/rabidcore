@@ -16,18 +16,14 @@ class Router extends Base {
 		$class = ucfirst($this->model)."Commands";
 		$this->controller  = new $class();
 		$this->command     = pick(array_shift($this->args), 'index');
+
 		if ($_POST['returnFormat']) {
 			$this->returnFormat = $_POST['returnFormat'];
 			unset($_POST['returnFormat']);
 		} $this->args[] = $_POST;
 		
-		if (!method_exists($this->controller, $this->command)) {
-			throw new CommandException("Command $command not found.");
-		}
-
-		try {
-			$this->result = call_user_func_array(Array($this->controller, $this->command), $this->args);
-		} catch (Exception $e) { $this->exception = $e; }
+		try { $this->result = call_user_func_array(Array($this->controller, $this->command), $this->args); }
+		catch (Exception $e) { $this->exception = $e; }
 
 		$returnFormat = strtolower($_SERVER['HTTP_X_REQUEST']);
 		$meth  = "output_$returnFormat";
@@ -40,8 +36,10 @@ class Router extends Base {
 	 */
 	private function output_full() {
 		if ($this->doRedirect()) {
-			header("Location: http://$_SERVER[SERVER_NAME]"
-			       .getLink($this->controller->redirect));
+			header("Location: http://$_SERVER[SERVER_NAME]" .getLink($this->controller->redirect));
+			//Just in case something goes horribly wrong, we'll add this fallback:
+			echo "You should have been redirected <a href=\"".getLink($this->controller->redirect)."\">here</a>.";
+			return;
 		} try {
 			$out = TemplateEngine::renderPage("$this->model/$this->command", 
 			       Array('result'=>$this->result, 'errors'=>$this->controller->errors));

@@ -26,7 +26,7 @@ class Commands extends Base {
 		$item = Query::findOne($this->model, $id);
 		if ($data) {
 			foreach ($data as $key=>$value) $item->$key = $value;
-			$this->errors = $item->errors;
+			$this->errors = $item->complaints;
 			$this->setRedirect("show/$item->id", "Item edited.");
 			$this->onEdit($item);
 			$item->save();
@@ -46,7 +46,7 @@ class Commands extends Base {
 		if ($data) {
 			$obj = new $class();
 			foreach ($data as $key=>$value) $obj->$key = $value;
-			$this->errors = $obj->errors;
+			$this->errors = $obj->complaints;
 			$obj->save();
 			$this->onCreate($obj);
 			$id = Database::getLastId();

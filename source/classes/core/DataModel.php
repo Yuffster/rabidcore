@@ -10,6 +10,7 @@ class DataModel extends Base {
 	private static $refs = Array();
 
 	protected $fields    = Array(); //The fields of the table associated with this model.
+	protected $required  = Array(); //No field in the required array may be null before save.
 	protected $autosave  = true;    //If set to true, the object will always save onunload.
 	protected $keyField  = 'id';    //Set to false if you don't want a primary key field.
 	//protected $table   = null;    //Set a table if the table name differs from the model name. 
@@ -19,7 +20,7 @@ class DataModel extends Base {
 	private $__modified  = Array(); //The raw data to go back into the database.
 	private $__new       = true;    //Does this object need to be INSERTed?
 	private $__linked    = Array(); //Query calls for linked objects.
-	private $errors      = Array(); //Errors thrown by validation methods.
+	public  $complaints  = Array(); //User-level errors thrown by validation methods.
 
 	/**
 	 * The model constructor takes an optional data array which will be the same
@@ -193,8 +194,10 @@ class DataModel extends Base {
 	 * (default).
 	 */
 	public function save() {
+		//Don't save if we don't have to: if the object hasn't been modified.
 		if (count($this->__modified) == 0) return false;
-		if (count($this->errors) > 0)      return false;
+		//Don't save if the object contains errors.
+		if (count($this->complaints) > 0)      return false;
 		//Are we creating a new file?
 		if ($this->__new == true) {
 			if (!$this->canCreate()) throw new PermissionException();
@@ -262,12 +265,13 @@ class DataModel extends Base {
 				$value = call_user_func(Array($this, "set$key"), $value);
 			}
 		} catch (UserDataException $e) { 
-			$this->errors[$key] = $e->getMessage();
+			$this->complaints[$key] = $e->getMessage();
 			return false;
 		}
 		//If this Model has its fields declared and the key isn't in __raw:
 		if (count($this->fields) > 0 && !isset($key, $this->__raw)) { 
-			throw new DataException("$this->table.$key does not exist.");
+			throw new DataException("$this->table.$key does not exist, "
+				."but is defined in $this->model's fields array.");
 		} $this->setRaw($key, $value);
 	}
 
@@ -287,7 +291,7 @@ class DataModel extends Base {
 	 * won't allow it.
 	 */
 	public function setId() {
-		throw new DataException("Cannot change the ID of a model.");
+		throw new DataException("Cannot change the ID of a model object.");
 	}
 
 	/**

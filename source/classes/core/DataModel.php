@@ -20,7 +20,7 @@ class DataModel extends Base {
 	private $__modified  = Array(); //The raw data to go back into the database.
 	private $__new       = true;    //Does this object need to be INSERTed?
 	private $__linked    = Array(); //Query calls for linked objects.
-	public  $complaints  = Array(); //User-level errors thrown by validation methods.
+	private $complaints  = Array(); //User-level errors thrown by validation methods.
 
 	/**
 	 * The model constructor takes an optional data array which will be the same
@@ -37,7 +37,20 @@ class DataModel extends Base {
 		if ($data != "reference") $this->init();
 	}
 
-	public function getErrors() { return $this->errors; }
+	public function getComplaints() { return $this->complaints; }
+
+	public function getComplaint($field) { return $this->complaints[$field]; }
+
+	public function addComplaint($field, $message) {
+		if ($this->complaints[$field] == null) {
+			$this->complaints[$field] = $message;
+		} elseif (is_array($this->complaints[$field])) {
+			$this->complaints[$field][] = $message;
+		} else {
+			$this->complaints[$field][] = $this->complaints[$field];
+			$this->complaints[$field][] = $message;
+		}
+	}
 
 	public function toArray() {
 		$return = Array();
@@ -197,7 +210,7 @@ class DataModel extends Base {
 		//Don't save if we don't have to: if the object hasn't been modified.
 		if (count($this->__modified) == 0) return false;
 		//Don't save if the object contains errors.
-		if (count($this->complaints) > 0)      return false;
+		if (count($this->complaints) > 0)  return false;
 		//Are we creating a new file?
 		if ($this->__new == true) {
 			if (!$this->canCreate()) throw new PermissionException();

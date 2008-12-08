@@ -37,9 +37,10 @@ class DataModel extends Base {
 		if ($data != "reference") $this->init();
 	}
 
-	public function getComplaints() { return $this->complaints; }
-
-	public function getComplaint($field) { return $this->complaints[$field]; }
+	public function getComplaints($field=null) { 
+		if ($field) return $this->complaints[$field];
+		return $this->complaints;
+	}
 
 	public function addComplaint($field, $message) {
 		if ($this->complaints[$field] == null) {

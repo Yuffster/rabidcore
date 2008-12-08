@@ -81,9 +81,9 @@
 	function __autoload($class) { 
 		$runDir = LOCAL_CONTEXT;
 		if ($runDir == null) {
-			throw new Exception("No context specified!");
-		} elseif (preg_match('/(\W)+/', $class)) { 
-			throw new Exception("Not a valid class name: $class.");
+			throw new ClassException("No context specified!");
+		} elseif ($class == NULL || preg_match('/(\W)+/', $class)) { 
+			throw new ClassException("Not a valid class name: $class.");
 		}
 		
 		$file = searchDir($class,dirname(__FILE__));

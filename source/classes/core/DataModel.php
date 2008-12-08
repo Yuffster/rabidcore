@@ -278,7 +278,7 @@ class DataModel extends Base {
 				$value = call_user_func(Array($this, "set$key"), $value);
 			}
 		} catch (UserDataException $e) { 
-			$this->complaints[$key] = $e->getMessage();
+			$this->addComplaint($key, $e->getMessage());
 			return false;
 		}
 		//If this Model has its fields declared and the key isn't in __raw:

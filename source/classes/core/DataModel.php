@@ -53,6 +53,16 @@ class DataModel extends Base {
 		}
 	}
 
+	/**
+	 * Resets all complaints.  If autosave is enabled, this will force the
+	 * object to save.
+	 *
+	 * Only use this method if you know what you're doing.
+	 *
+	 * THIS WILL ALLOW BAD DATA TO BE SAVED TO THE DATABASE.
+	 */
+	public function clearComplaints() { $this->complaints = Array(); }
+
 	public function toArray() {
 		$return = Array();
 		foreach ($this->__raw as $key=>$value) {

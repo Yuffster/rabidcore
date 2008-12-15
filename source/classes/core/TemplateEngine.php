@@ -5,7 +5,7 @@
  * Part of RabidCore.
  * For licensing and information, visit <http://rabidcore.com>.
  */
-class TemplateEngine extends Base {
+class PageEngine extends Base {
 
 	protected static $baseDir = 'views/'; //The base directory for template files.
 

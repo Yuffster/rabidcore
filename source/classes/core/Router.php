@@ -41,12 +41,12 @@ class Router extends Base {
 			echo "You should have been redirected <a href=\"".getLink($this->controller->redirect)."\">here</a>.";
 			return;
 		} try {
-			$out = TemplateEngine::renderPage("$this->model/$this->command", 
+			$out = PageEngine::renderPage("$this->model/$this->command", 
 			       Array('result'=>$this->result, 'errors'=>$this->controller->errors));
 		} catch (Exception $e) {
 			$this->exception = $e;
 		} if ($this->exception) {
-			$out = TemplateEngine::renderPage("error", Array('result'=>$this->exception));
+			$out = PageEngine::renderPage("error", Array('result'=>$this->exception));
 		} return $out;
 	}
 
@@ -80,7 +80,7 @@ class Router extends Base {
 	 */
 	private function output_partial() {
 		if ($this->doRedirect()) return Router::route($this->contoller->redirect);
-		return TemplateEngine::renderPartial("$this->model/$this->command", 
+		return PageEngine::renderPartial("$this->model/$this->command", 
 		       Array('result'=>$this->result, 'errors'=>$this->controller->errors));
 	}
 

@@ -1,7 +1,7 @@
-TemplateEngine
+PageEngine
 ======================
 
-The TemplateEngine works with the File class to render HTML files.  This class is optimized to use HTML files that are easy to read for designers and front-end coders with little PHP experience.
+The PageEngine works with the File class to render HTML files.  This class is optimized to use HTML files that are easy to read for designers and front-end coders with little PHP experience.
 
 **Note**: While this class is functional, it is not yet complete.
 
@@ -32,7 +32,7 @@ Takes the location of a template file as its content, wraps it in views/main.php
 
 ### Syntax:
 
-	TemplateEngine::renderPage(contentFile[, variables]);
+	PageEngine::renderPage(contentFile[, variables]);
 
 ### Arguments:
 
@@ -49,7 +49,7 @@ Takes the location of a template file as its content, wraps it in views/main.php
 
 ### Example:
 
-	TemplateEngine::renderPage('filenotfound', Array('file'=>'player/inventory'));
+	PageEngine::renderPage('filenotfound', Array('file'=>'player/inventory'));
 
 Template Method: renderPartial
 ---------------------------------
@@ -58,7 +58,7 @@ Takes the location of a template file as its content and returns it without wrap
 
 ### Syntax:
 
-	TemplateEngine::renderPartial(contentFile[, variables]);
+	PageEngine::renderPartial(contentFile[, variables]);
 
 ### Arguments:
 
@@ -71,4 +71,4 @@ Takes the location of a template file as its content and returns it without wrap
 
 ### Example:
 
-	$result = TemplateEngine::renderPartial('user/form', Array('action'=>'edit'));
+	$result = PageEngine::renderPartial('user/form', Array('action'=>'edit'));

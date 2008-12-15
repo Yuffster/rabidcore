@@ -29,7 +29,7 @@ Router Method: output_full
 
 This default output method will output the full rendered HTML page, including the content template and the layout template.
 
-The TemplateEngine is passed the following values:
+The PageEngine is passed the following values:
 
 - result (mixed) The return result of the Commands class operation.
 - errors (array) An array of key=>value errors, if they exist.

@@ -270,7 +270,7 @@ Saves the object's information to the database.  This will be called automatical
 ### Example:
 
     $user->status = "away";
-	$user-save();
+	$user->save();
 
 
 DataModel Method: delete

@@ -21,7 +21,7 @@
 	/**
 	 * The request router looks at the URI path, tries to load it from /assets,
 	 * then tries to route the request through the Router if it's a model.
-	 * If it's not a model, the TemplateEngine tries to render the template file.
+	 * If it's not a model, the PageEngine tries to render the template file.
 	 */
 	function routeRequest() {
 		$path = getPath();

@@ -25,14 +25,14 @@
 	 */
 	function routeRequest() {
 		$path = getPath();
-		if (!$path) return TemplateEngine::renderPage('index');
+		if (!$path) return PageEngine::renderPage('index');
 		if (File::find("assets/$path")) File::render("assets/$path");
 		$argh = explode("/", $path);
 		if (model_exists($argh[0])) {
 			$router = new Router();
 			return $router->route($path);
 		} else {
-			return TemplateEngine::renderPage($path);
+			return PageEngine::renderPage($path);
 		}
 	}
 

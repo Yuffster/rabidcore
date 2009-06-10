@@ -1,4 +1,4 @@
-<?
+<?php
 
 //Test configuration
 define("DEBUG_MODE", 1);

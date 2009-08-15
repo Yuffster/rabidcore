@@ -9,7 +9,7 @@ include('bootstrapper.php');
 
 try { 
 	echo routeRequest();
-//Fallback error handler for when the TemplateEngine isn't around to help.
+//Fallback error handler for when the PageEngine isn't around to help.
 } catch (Exception $e) {
 	echo "Sorry, there was an error: ".$e->getMessage().".";
 }

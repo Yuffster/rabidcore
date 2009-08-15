@@ -1,29 +1,29 @@
 <?php
- 
+
 /**
 * Copyright 2008 Michelle Steigerwalt <msteigerwalt.com>.
 * Part of RabidCore.
 * For licensing and information, visit <http://rabidcore.com>.
 */
 class Base {
- 
+
   private $__stored = Array();
- 
+
   protected function __toString() {
     return "[".get_class($this)."]";
   }
- 
+
   protected function get($key) { return $this->$key; }
- 
+
   /**
    * Generic __get functionality is to check the stored values, then the get
    * method for the requested key.
    */
   protected function __get($key) {
-    if (isset($this->stored[$key])) return $this->stored[$key];
+    if (isset($this->__stored[$key])) return $this->__stored[$key];
     else return $this->checkGets($key);
   }
- 
+
   /**
    * Checks to see if there's a get method for the passed key. If so, returns
    * that key. This is a very useful shorthand for __get methods in extended
@@ -35,7 +35,7 @@ class Base {
       return $this->$meth();
     } return false;
   }
- 
+
   /**
    * Store a variable for later (useful for things that might be requested
    * multiple times and have calculation overhead).
@@ -46,16 +46,16 @@ class Base {
    * Returns the value set to make possible code such as:
    * return $this->store($key, 'value');
    */
-   protected function store($key, $value) {
-    $this->__remembered[$key] = $value;
+  protected function store($key, $value) {
+    $this->__stored[$key] = $value;
     return $value;
   }
- 
+
   protected function retrieve($key) {
     if (isset($this->__stored[$key])) return $this->__stored[$key];
     return false;
   }
- 
+
   /**
    * While not generally useful all across the board, this little method
    * reduces a lot of code overhead in the data-handling classes and I just
@@ -65,7 +65,7 @@ class Base {
     $db = Database::init();
     return $db;
   }
- 
+
 }
- 
+
 ?>

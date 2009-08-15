@@ -25,14 +25,13 @@
 	 */
 	function routeRequest() {
 		$path = getPath();
-		if (!$path) return PageEngine::renderPage('index');
+		if (!$path) return TemplateEngine::renderPage('index');
 		if (File::find("assets/$path")) File::render("assets/$path");
-		$argh = explode("/", $path);
-		if (model_exists($argh[0])) {
+		try {
 			$router = new Router();
 			return $router->route($path);
-		} else {
-			return PageEngine::renderPage($path);
+		} catch(ModelExistenceException $e) {
+			return TemplateEngine::renderPage($path);
 		}
 	}
 
@@ -94,7 +93,7 @@
 			if ($file) require_once($file);
 			/* This bit of code automatically generates empty class files based
 			   on the class name.  */
-			$parents = Array("Commands", "Mapper", "Exception");
+			$parents = Array("Commands", "Mapper", "Exception", "Query");
 			foreach ($parents as $p) {
 				if (preg_match('/'.$p.'$/', $class)) {
 					eval ("class $class extends $p { }");

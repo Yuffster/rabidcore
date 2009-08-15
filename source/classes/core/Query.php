@@ -20,16 +20,27 @@ class Query implements Iterator {
 	 * items of the specified data model meeting the specified criteria.  If
 	 * no criteria is set, all items will be returned.
 	 */
-	public function __construct($model, $criteria = null, $limit = null) {
-		$this->model    = $model;
+	public function __construct($criteria = null, $limit = null, $page = null) {
+		$this->model    = preg_replace('/Query$/', '', get_class($this));
+		if ($this->model == null) throw new QueryException("Model not given");
 		$this->criteria = $criteria;
-		$this->limit    = $limit;
+		$this->limit = $limit;
+		$this->page  = $page;
 		return $this;
 	}
 
-	public static function findOne($model, $criteria) {
-		$results = new Query($model, $criteria, 1);
-		return $results->getRow(0);
+	public static function create($model, $criteria = null, $limit = null, $page = null) {
+		$class = $model."Query";
+		return new $class($criteria, $limit, $page);
+	}
+
+	public function limit($limit, $page=0) {
+		$this->limit = $limit;
+		$this->page  = $page;
+	}
+
+	public function getFirst() {
+		return $this->getRow(0);
 	}
 
 	public function orderBy($field, $order) {
@@ -70,7 +81,10 @@ class Query implements Iterator {
 
 	public function toArray() { 
 		$this->ensureSearch();
-		return $this->rows;
+		$result = Array();
+		foreach ($this->rows as $n=>$val) {
+			$result[] = $this->getRow($n)->toArray();
+		} return $result;
 	}
 
 	/** Iterator Stuff - Not Very Exciting. **/
@@ -88,9 +102,7 @@ class Query implements Iterator {
 
 	public function valid() { return !is_null($this->current()); } 
 
-	public function current() { 
-		return $this->getRow($this->current); 
-	}
+	public function current() { return $this->getRow($this->current); }
 
 	public function key()  { return $this->current; }
 

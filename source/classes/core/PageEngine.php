@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright 2008 Michelle Steigerwalt <msteigerwalt.com>.
+ * Copyright 2008-2010 Michelle Steigerwalt <msteigerwalt.com>.
  * Part of RabidCore.
  * For licensing and information, visit <http://rabidcore.com>.
  */
@@ -32,12 +32,7 @@ class PageEngine extends Base {
 	}
 
 	public static function renderPartial($templateFile, Array $vars = null) {
-		if ($vars) { 
-			foreach ($vars as $key=>$value) {
-				global $$key;
-				$$key = $value;
-			}
-		} 
+		export($vars);
 		ob_start();
 			eval('?>'.File::getContents(self::$baseDir."$templateFile.php", $vars));
 			$content = ob_get_contents();

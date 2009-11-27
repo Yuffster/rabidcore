@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright 2008 Michelle Steigerwalt <msteigerwalt.com>.
+ * Copyright 2008-2010 Michelle Steigerwalt <msteigerwalt.com>.
  * Part of RabidCore.
  * For licensing and information, visit <http://rabidcore.com>.
  */
@@ -20,7 +20,7 @@ class DataModel extends Base {
 	private $__modified  = Array(); //The raw data to go back into the database.
 	private $__new       = true;    //Does this object need to be INSERTed?
 	private $__linked    = Array(); //Query calls for linked objects.
-	private $__rules     = Array();
+	private $__rules     = Array(); //Rules to enforce on field values.
 	private $complaints  = Array(); //User-level errors thrown by validation methods.
 
 	/**
@@ -38,20 +38,21 @@ class DataModel extends Base {
 		if ($data != "reference") $this->init();
 	}
 
+	public function hasComplaints($field=null) {
+		if ($field) return (count($this->complaints[$field]) > 0);
+		return (count($this->complaints) > 0);
+	}
+
 	public function getComplaints($field=null) { 
 		if ($field) return $this->complaints[$field];
 		return $this->complaints;
 	}
 
 	public function addComplaint($field, $message) {
-		if ($this->complaints[$field] == null) {
-			$this->complaints[$field] = $message;
-		} elseif (is_array($this->complaints[$field])) {
-			$this->complaints[$field][] = $message;
-		} else {
-			$this->complaints[$field][] = $this->complaints[$field];
-			$this->complaints[$field][] = $message;
+		if (!is_array($this->complaints[$field])) {
+			$this->complaints[$field] = Array();
 		}
+		$this->complaints[$field][] = $message;
 	}
 
 	/**
@@ -62,7 +63,10 @@ class DataModel extends Base {
 	 *
 	 * THIS WILL ALLOW BAD DATA TO BE SAVED TO THE DATABASE.
 	 */
-	public function clearComplaints() { $this->complaints = Array(); }
+	public function clearComplaints($key=null) {
+		if ($key) unset($this->complaints[$key]); 
+		else $this->complaints = Array();
+	}
 
 	public function toArray() {
 		$return = Array();
@@ -187,7 +191,9 @@ class DataModel extends Base {
 		if (method_exists($this, "validate$key")) {
 			return call_user_func_array(Array($this, "validate$key"), $value);
 		}
-
+		foreach ($this->__rules as $r) {
+			if (array_key_exists($key, $r)) return enforce($rule, $value);
+		}
 	}
 
 	/**
@@ -201,6 +207,7 @@ class DataModel extends Base {
 		$args = func_get_args();
 		$rule = array_shift($args);
 		$keys = $args;
+		$this->__rules[$rule] = $keys;
 	}
 
 	protected function enforce($rule, $value) {
@@ -212,7 +219,6 @@ class DataModel extends Base {
 	/** 
 	 * Feel free to add more rules.  This one is provided as an example.
 	 */
-
 	protected function enforceRequired($value) {
 		if ($value == null) complain("is a required value");
 	}
@@ -257,30 +263,45 @@ class DataModel extends Base {
 		if (!$this->canCreate()) throw new PermissionException();
 		foreach ($data as $field=>$value) $this->$field = $value;
 	}
-
+	
 	/**
 	 * Saves the Model's __raw data to the database.  This method will be 
 	 * called before the object is destroyed if $this->autosave is set to true 
 	 * (default).
 	 */
 	public function save() {
+		//Check all the required fields.
+		if ($this->__rules['required']) {
+			foreach ($this->__rules['required'] as $field) {
+				$val = $this->$field;
+				if ($val===null) $this->addComplaint($field, "required");
+			}	
+		}
 		//Don't save if we don't have to: if the object hasn't been modified.
-		if (count($this->__modified) == 0) return false;
+		if (count($this->__modified) == 0) {
+			return false;
+		}
 		//Don't save if the object contains errors.
 		if (count($this->complaints) > 0)  return false;
 		//Are we creating a new file?
 		if ($this->__new == true) {
-			if (!$this->canCreate()) throw new PermissionException();
-			$this->__new =  false;
+			if ($this->canCreate()===false) throw new PermissionException();
+			$this->__new = false;
 			if (!$this->db) throw new Exception("Database not loaded.");
-			return $this->db->insert($this->table, $this->__modified);
+			$id = $this->db->insert($this->table, $this->__modified);
+			if (!$id) throw new DataException("No ID granted to new item.");
+			$this->fillRaw($this->__modified); $this->__modified = Array();
+			$this->__raw['id'] = $id;
+			return $this->id;
 		//Has this object been modified?
 		} else if ($this->keyField && count($this->__modified) > 0) {
 			$this->db->update($this->table, $this->__modified, 
 			                  Array($this->keyField=>$this->key));
-		} $this->fillRaw($this->__modified); $this->__modified = Array();
+			$this->fillRaw($this->__modified); $this->__modified = Array();
+			return $this->id;
+		} return false;
 	}
-	
+
 	public function delete() {
 		if (!$this->canDelete()) throw new PermissionException();
 		$this->db->delete($this->table,Array($this->keyField=>$this->key));
@@ -329,13 +350,19 @@ class DataModel extends Base {
 	 */
 	private function modifyField($key, $value) {
 		try {
+			if ($this->canEdit($key) === false 
+			    OR ($this->canCreate() === false AND $this->__new)) {
+				$this->addComplaint($key, "is not editable");
+				return false;
+			}
 			$this->validate($key, $value);
-			if ($this->canEdit($key) === false) return false;
+			if (count($this->fields) > 0 && !in_array($key, $this->fields)) {
+				throw new DataException("Can't find field for $key in $this->model");
+				return false;
+			}
 			if (method_exists($this, "set$key")) {
 				$value = call_user_func(Array($this, "set$key"), $value);
-			}
-			foreach ($this->__rules as $r) {
-				if (array_key_exists($key, $r)) return enforce($rule, $value);
+				if ($value === false) return false;
 			}
 		} catch (UserDataException $e) { 
 			$this->addComplaint($key, $e->getMessage());
@@ -345,7 +372,13 @@ class DataModel extends Base {
 		if (count($this->fields) > 0 && !isset($key, $this->__raw)) { 
 			throw new DataException("$this->table.$key does not exist, "
 				."but is defined in $this->model's fields array.");
-		} $this->setRaw($key, $value);
+		}
+		//Now that we know the field is valid, we can set it in model.
+		//Later, it will be saved to the database.
+		$this->setRaw($key, $value);
+		//We have to reset the complaints in case invalid values have been
+		//set for this field in the past.
+		$this->clearComplaints($key);
 	}
 
 	/**

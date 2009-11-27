@@ -20,6 +20,7 @@ class DataModel extends Base {
 	private $__modified  = Array(); //The raw data to go back into the database.
 	private $__new       = true;    //Does this object need to be INSERTed?
 	private $__linked    = Array(); //Query calls for linked objects.
+	private $__rules     = Array();
 	private $complaints  = Array(); //User-level errors thrown by validation methods.
 
 	/**
@@ -167,20 +168,59 @@ class DataModel extends Base {
 	 */
 	public function canCreate() { return true; }
 
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ * Data Validation includes key-specific validation methods as well as generic
+ * rule-specific validations.
+ * 
+ * See the validate method for information on key-specific validation and the 
+ * enforce/addRule methods for information on generic validation.
+ *+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ */
+
 	/**
 	 * Data validation can be done by creating a validateKey method, where 
 	 * key is the name of the property to validate.
+	 *
+	 * For generic rules, use addRule($rule, $key1[, $key2...]);
 	 */
 	private function validate($key, $value) {
 		if (method_exists($this, "validate$key")) {
 			return call_user_func_array(Array($this, "validate$key"), $value);
 		}
+
 	}
 
-	private function create($data) {
-		if (!$this->canCreate()) throw new PermissionException();
-		foreach ($data as $field=>$value) $this->$field = $value;
+	/**
+	 * This is a dynamic arguments method.  The first argument is the rule to be
+	 * enforced.  The remaining arguments are the keys to follow the passed rule.
+	 *
+	 * Example:
+	 *     > $this->addRule('required', 'login', 'email', 'password');
+	 */
+	protected function addRule() {
+		$args = func_get_args();
+		$rule = array_shift($args);
+		$keys = $args;
 	}
+
+	protected function enforce($rule, $value) {
+		if (method_exists($this, "enforce$rule")) {
+			return call_user_func_array(Array($this, "enforce$rule"), $value);
+		}
+	}
+
+	/** 
+	 * Feel free to add more rules.  This one is provided as an example.
+	 */
+
+	protected function enforceRequired($value) {
+		if ($value == null) complain("is a required value");
+	}
+
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ * CRUD stuff.  Except that most of the R is in the Query class.
+ *+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ */
 
 	/**
 	 * Magic __set method.
@@ -210,6 +250,12 @@ class DataModel extends Base {
 
 	public function get($key) {
 		if ($this->canView($key)) return $this->getRaw($key);
+	}
+
+	/* Creates a new model object. */
+	private function create($data) {
+		if (!$this->canCreate()) throw new PermissionException();
+		foreach ($data as $field=>$value) $this->$field = $value;
 	}
 
 	/**
@@ -287,6 +333,9 @@ class DataModel extends Base {
 			if ($this->canEdit($key) === false) return false;
 			if (method_exists($this, "set$key")) {
 				$value = call_user_func(Array($this, "set$key"), $value);
+			}
+			foreach ($this->__rules as $r) {
+				if (array_key_exists($key, $r)) return enforce($rule, $value);
 			}
 		} catch (UserDataException $e) { 
 			$this->addComplaint($key, $e->getMessage());

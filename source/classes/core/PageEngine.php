@@ -32,7 +32,8 @@ class PageEngine extends Base {
 	}
 
 	public static function renderPartial($templateFile, Array $vars = null) {
-		export($vars);
+		if (!$vars) $vars = Array();
+		extract($vars);
 		ob_start();
 			eval('?>'.File::getContents(self::$baseDir."$templateFile.php", $vars));
 			$content = ob_get_contents();

@@ -319,12 +319,7 @@ class DataModel extends Base {
 	}
 
 	/**
-	 * Returns a string representing a Database query to retrieve the object
-	 * object(s) associated with this object.
-	 *
-	 * In The Future, this can be replaced with some super fancy JOIN method,
-	 * assuming the current way of doing things causes horrible problems down
-	 * the line.
+	 * Returns the Query object of a linked object or object set.
 	 */
 	private function getLinked($key) {
 		if ($this->__linked[$key]->limit == 1) { 

@@ -18,7 +18,7 @@ The Query class will not perform its search until a method which requires its re
 
 ### Syntax:
 
-	new Query(model[, criteria, limit]);
+	new <model>Query(criteria, limit);
 
 ### Arguments:
 

@@ -140,7 +140,7 @@
 		$rpath = explode("?", str_replace($uri."/", '', $_SERVER['REQUEST_URI']));
 		if ($rpath[0] == "/") { $rpath[0] = "/index"; }
 		define('__PATH__', $rpath[0]);
-		return $rpath[0];
+		return preg_replace('/^\//', '', $rpath[0]);
 	}
 
 	function setPath($path) {

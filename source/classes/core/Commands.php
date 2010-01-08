@@ -13,7 +13,8 @@ class Commands extends Base {
 	protected $errors   = Array();
 
 	public function index() {
-		return new Query($this->model);	
+		$class = $this->model."Query";
+		return new $class();	
 	}
 
 	public function show($id) {

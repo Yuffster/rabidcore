@@ -3,7 +3,9 @@ RabidCore
 
 RabidCore is a super-minimalist web framework (fewer than ten files!), meant to be extended to meet the individual needs of each project.
 
-Originally developed in 2008, the primary function of this code is as an educational example of dynamic PHP programming methods and simplistic API design.  However, it can still be used as a perfectly functional foundation for a complex LAMP application.
+Originally developed in 2008, this project now serves as an educational example of dynamic PHP programming methods and simplistic API design.
+
+However, it can still be used as a perfectly functional foundation for a complex LAMP application.
 
 Class Documentation
 ========================

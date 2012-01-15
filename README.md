@@ -1,8 +1,16 @@
-RabidCore Preview 
+RabidCore 
+------------------------
+
+RabidCore is a super-minimalist web framework (fewer than ten files!), meant to be extended to meet the individual needs of each project.
+
+Originally developed in 2008, the primary function of this code is as an educational example of dynamic PHP programming methods and simplistic API design.  However, it can still be used as a perfectly functional foundation for a complex LAMP application.
+
+Class Documentation
 ========================
 
-This is a preview release of RabidCore.  It is not recommended for production
-use at this time.
-
-This code is currently being developed in a production setting, and should be
-available for public use shortly.
+* [Commands](docs/Commands.md)
+* [DataModel](docs/DataModel.md)
+* [File](docs/File.md)
+* [PageEngine](docs/PageEngine.md)
+* [Query](docs/Query.md)
+* [Router](docs/Router.md)
